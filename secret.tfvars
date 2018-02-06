@@ -1,0 +1,5 @@
+AWS_ACCESS_KEY = "AKIAIJKICUGVAOSIGIVA"
+AWS_SECRET_KEY = "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"
+AMIS = {
+       "us-west-2" = "ami-d47182ac"
+}
