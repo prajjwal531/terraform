@@ -17,6 +17,17 @@ resource "aws_subnet" "public-subnet" {
   }
 }
 
+resource "aws_subnet" "public-subnet2" {
+  vpc_id     = "${aws_vpc.non-default.id}"
+  cidr_block = "10.0.3.0/24"
+  availability_zone = "${element(var.AVAILABILITY_ZONE,2)}"
+  tags {
+    Name = "public-subnet2"
+  }
+}
+
+
+
 resource "aws_subnet" "private-subnet" {
   vpc_id     = "${aws_vpc.non-default.id}"
   cidr_block = "10.0.2.0/24"
@@ -52,6 +63,12 @@ resource "aws_route_table_association" "assosiation" {
   subnet_id      = "${aws_subnet.public-subnet.id}"
   route_table_id = "${aws_route_table.r.id}"
 }
+
+resource "aws_route_table_association" "assosiation3" {
+  subnet_id      = "${aws_subnet.public-subnet2.id}"
+  route_table_id = "${aws_route_table.r.id}"
+}
+
 resource "aws_eip" "nat" {
   vpc      = true
 }
@@ -104,7 +121,6 @@ resource "aws_security_group" "private_security" {
 resource "aws_instance" "private" {
   ami           =  "${lookup(var.AMIS, var.AWS_REGION)}"
   instance_type = "t2.micro"
-  key_name = "${aws_key_pair.aws_key.key_name}"
   vpc_security_group_ids = ["${aws_security_group.private_security.id}"]
   subnet_id      = "${aws_subnet.private-subnet.id}"
   source_dest_check = false
@@ -112,4 +128,22 @@ resource "aws_instance" "private" {
   tags {
     Name = "Private Subnet"
   }
+}
+
+resource "aws_instance" "public" {
+  ami           =  "${lookup(var.AMIS, var.AWS_REGION)}"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = ["${aws_security_group.private_security.id}"]
+  subnet_id      = "${aws_subnet.public-subnet.id}"
+  key_name = "${aws_key_pair.aws_key.key_name}"
+  tags {
+
+     Name = "Public Subnet"
+  }
+
+}
+
+resource "aws_eip" "lb" {
+  instance = "${aws_instance.public.id}"
+  vpc      = true
 }

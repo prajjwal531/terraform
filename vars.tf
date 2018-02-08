@@ -12,6 +12,8 @@ variable "AVAILABILITY_ZONE" {
   type = "list"
   default = ["us-west-2a","us-west-2b"]
 }
+
+
 variable "AWS_REGION" {
   default = "us-west-2"
 }
